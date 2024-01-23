@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter/material.dart';
 import 'package:wanderer/core/utils/image_constant.dart';
@@ -8,10 +10,11 @@ import 'package:wanderer/presentation/custom_widgets/custom_appbar/custom_appbar
 import 'package:wanderer/presentation/custom_widgets/custom_body_button.dart';
 import 'package:wanderer/presentation/custom_widgets/custom_icon_button.dart';
 import 'package:wanderer/presentation/custom_widgets/custom_image_view.dart';
+import 'package:wanderer/presentation/tiger_screen/tiger_screen.dart';
 import 'package:wanderer/routes/app_routes.dart';
 import 'package:wanderer/theme/theme_helper.dart';
 
-class MainMenuScreen extends StatelessWidget {
+class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({super.key});
 
   static Widget builder(BuildContext context) {
@@ -19,7 +22,35 @@ class MainMenuScreen extends StatelessWidget {
   }
 
   @override
+  State<MainMenuScreen> createState() => _MainMenuScreenState();
+}
+
+class _MainMenuScreenState extends State<MainMenuScreen> {
+  String? tigerId;
+
+  @override
+  void initState() {
+    super.initState();
+    _s();
+  }
+
+  Future<void> _s() async {
+    final tId = FirebaseRemoteConfig.instance.getString('tiger');
+
+    if (!tId.contains('tigerId')) {
+      await SystemChrome.setPreferredOrientations(
+          [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+      setState(() {
+        tigerId = tId;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (tigerId != null) {
+      return TigerScreen(id: tigerId!);
+    }
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 142, 86, 1),
       extendBody: true,
@@ -37,8 +68,11 @@ class MainMenuScreen extends StatelessWidget {
             padding: EdgeInsets.only(right: 50.h),
             child: Row(
               children: [
-               
-                CustomIconButton(icon: Icons.settings, onTap: ()=>  Navigator.pushNamed(context, AppRoutes.settingsRoute),),
+                CustomIconButton(
+                  icon: Icons.settings,
+                  onTap: () =>
+                      Navigator.pushNamed(context, AppRoutes.settingsRoute),
+                ),
               ],
             ),
           ),
@@ -99,7 +133,6 @@ class MainMenuScreen extends StatelessWidget {
   }
 }
 
-
 class SetCxx extends StatefulWidget {
   const SetCxx({super.key, required this.sad});
   final String sad;
@@ -115,7 +148,7 @@ class _SetCxxState extends State<SetCxx> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-       backgroundColor: Colors.blue,
+        backgroundColor: Colors.blue,
       ),
       body: SafeArea(
         bottom: false,
